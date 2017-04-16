@@ -27,19 +27,26 @@ void KalmanFilter::Predict() {
 
 }
 
-void KalmanFilter::Update(const VectorXd &z) {
+void KalmanFilter::UpdatePred(const VectorXd &z, const MatrixXd &zpred){
 
-  VectorXd y = z - H_ * x_;
+  VectorXd y = z - zpred;
   MatrixXd Ht = H_.transpose();
-  MatrixXd S = H_ * P_ * Ht + R_;
+  MatrixXd PHt = P_ * Ht;
+  MatrixXd S = H_ * PHt + R_;
   MatrixXd Si = S.inverse();
-  MatrixXd K = P_ * Ht * Si;
+  MatrixXd K = PHt * Si;
 
   x_ = x_ + (K * y);
   long x_size = x_.size();
   MatrixXd I = MatrixXd::Identity(x_size, x_size);
   P_ = (I - K * H_) * P_;
 
+}
+
+void KalmanFilter::Update(const VectorXd &z) {
+
+  MatrixXd zpred = H_ *x_;
+  UpdatePred(z, zpred);
 
 }
 
@@ -60,17 +67,6 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   MatrixXd zpred(3, 1);
   zpred << range, bearing, range_rate;
 
-  //VectorXd y = z - H_ * x_;
-  VectorXd y = z - zpred;
-  MatrixXd Ht = H_.transpose();
-  MatrixXd S = H_ * P_ * Ht + R_;
-  MatrixXd Si = S.inverse();
-  MatrixXd K = P_ * Ht * Si;
-
-  x_ = x_ + (K * y);
-  long x_size = x_.size();
-  MatrixXd I = MatrixXd::Identity(x_size, x_size);
-  P_ = (I - K * H_) * P_;
-
+  UpdatePred(z,zpred);
 
 }

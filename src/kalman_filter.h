@@ -64,6 +64,13 @@ public:
    */
   void UpdateEKF(const Eigen::VectorXd &z);
 
+private:
+
+  /**
+   * helper function to update state
+   */
+  void UpdatePred(const Eigen::VectorXd &z, const Eigen::MatrixXd &zpred);
+
 };
 
 #endif /* KALMAN_FILTER_H_ */
